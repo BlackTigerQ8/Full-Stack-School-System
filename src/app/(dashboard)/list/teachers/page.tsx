@@ -5,7 +5,7 @@ import TableSearch from "@/components/TableSearch";
 import { ITEMS_PER_PAGE } from "@/lib/settings";
 import { role } from "@/lib/data";
 import prisma from "@/lib/prisma";
-import { Class, Subject, Teacher } from "@prisma/client";
+import { Class, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -101,8 +101,44 @@ const TeacherListPage = async ({
 
   const p = page ? Number(page) : 1;
 
+  // URL PARAMS CONDITION
+  const query: Prisma.TeacherWhereInput = {};
+
+  // This part is to restrict the query to only the teachers that teach the class
+  if (queryParams) {
+    for (const [key, value] of Object.entries(queryParams)) {
+      if (value !== undefined) {
+        switch (key) {
+          case "classId": {
+            const classId = parseInt(value);
+            if (!isNaN(classId)) {
+              query.lessons = {
+                some: {
+                  classId: classId,
+                },
+              };
+            } else {
+              console.error("Invalid classId:", value);
+            }
+            break;
+          }
+          case "search": {
+            query.name = {
+              contains: value,
+              mode: "insensitive",
+            };
+            break;
+          }
+          default:
+            break;
+        }
+      }
+    }
+  }
+
   const [data, count] = await prisma.$transaction([
     prisma.teacher.findMany({
+      where: query,
       include: {
         subjects: true,
         classes: true,
@@ -110,7 +146,9 @@ const TeacherListPage = async ({
       take: ITEMS_PER_PAGE,
       skip: ITEMS_PER_PAGE * (Number(p) - 1),
     }),
-    prisma.teacher.count(),
+    prisma.teacher.count({
+      where: query,
+    }),
   ]);
 
   return (
