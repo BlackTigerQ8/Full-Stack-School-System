@@ -106,3 +106,55 @@
   color: gray !important;
   margin-bottom: 5px;
 }
+
+/* Hide all possible Clerk footer variations */
+.cl-footer,
+.cl-modalFooter,
+.cl-userButtonPopoverFooter,
+.cl-profileSectionFooter,
+.cl-userProfileModalFooter,
+.cl-profileSectionPrimaryButton,
+div[class*="footer" i],
+div[class*="Footer" i] {
+  display: none !important;
+  visibility: hidden !important;
+  height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Target all Clerk elements containing branding text */
+[class*="cl-"]:has-text("Secured by"),
+[class*="cl-"]:has-text("Development mode"),
+[class*="cl-"]:has-text("clerk") {
+  display: none !important;
+}
+
+/* Alternative text-based targeting */
+*:contains("Secured by"),
+*:contains("Development mode") {
+  display: none !important;
+}
+
+/* Specific targeting for modal containers */
+.cl-modal .cl-footer,
+.cl-modalContent .cl-footer,
+.cl-userProfile .cl-footer,
+.cl-card .cl-footer,
+div[data-clerk-modal] .cl-footer,
+div[role="dialog"] .cl-footer {
+  display: none !important;
+}
+
+/* Hide any element at the bottom of Clerk modals that might contain branding */
+.cl-modal > div:last-child,
+.cl-modalContent > div:last-child,
+.cl-card > div:last-child {
+  display: none !important;
+}
+
+/* Reset the above rule for elements that shouldn't be hidden */
+.cl-modal > div:last-child:not([class*="footer" i]),
+.cl-modalContent > div:last-child:not([class*="footer" i]),
+.cl-card > div:last-child:not([class*="footer" i]) {
+  display: block !important;
+}
