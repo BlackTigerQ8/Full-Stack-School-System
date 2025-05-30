@@ -5,8 +5,8 @@ import TableSearch from "@/components/TableSearch";
 import prisma from "@/lib/prisma";
 import { ITEMS_PER_PAGE } from "@/lib/settings";
 import { Announcement, Class, Prisma } from "@prisma/client";
-import { auth } from "@clerk/nextjs/server";
 import Image from "next/image";
+import { getRole } from "@/lib/utils";
 
 type AnnouncementList = Announcement & { class: Class };
 
@@ -15,11 +15,7 @@ const AnnouncementListPage = async ({
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
-  const { userId, sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  const currentUserId = userId;
-
-  const columns = [
+  const columns = (role: string | undefined) => [
     {
       header: "Title",
       accessor: "title",
@@ -43,13 +39,13 @@ const AnnouncementListPage = async ({
       : []),
   ];
 
-  const renderRow = (item: AnnouncementList) => (
+  const renderRow = (item: AnnouncementList, role: string | undefined) => (
     <tr
       key={item.id}
       className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-customPurpleLight"
     >
       <td className="flex items-center gap-4 p-4">{item.title}</td>
-      <td>{item.class.name}</td>
+      <td>{item.class?.name || "-"}</td>
       <td className="hidden md:table-cell">
         {new Intl.DateTimeFormat("en-GB", {
           year: "numeric",
@@ -73,6 +69,7 @@ const AnnouncementListPage = async ({
   const { page, ...queryParams } = searchParams;
 
   const p = page ? Number(page) : 1;
+  const { role, currentUserId } = await getRole();
 
   // URL PARAMS CONDITION
   const query: Prisma.AnnouncementWhereInput = {};
@@ -143,7 +140,11 @@ const AnnouncementListPage = async ({
         </div>
       </div>
       {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={data} />
+      <Table
+        columns={columns(role)}
+        renderRow={(item: AnnouncementList) => renderRow(item, role)}
+        data={data}
+      />
       {/* PAGINATION */}
       <Pagination page={p} count={count} />
     </div>

@@ -2,15 +2,15 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { parentsData, role } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { ITEMS_PER_PAGE } from "@/lib/settings";
 import { Prisma, Parent, Student } from "@prisma/client";
 import Image from "next/image";
+import { getRole } from "@/lib/utils";
 
 type ParentList = Parent & { students: Student[] };
 
-const columns = [
+const columns = (role: string | undefined) => [
   {
     header: "Info",
     accessor: "info",
@@ -30,13 +30,17 @@ const columns = [
     accessor: "address",
     className: "hidden lg:table-cell",
   },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
+  ...(role === "admin"
+    ? [
+        {
+          header: "Actions",
+          accessor: "action",
+        },
+      ]
+    : []),
 ];
 
-const renderRow = (item: ParentList) => (
+const renderRow = (item: ParentList, role: string | undefined) => (
   <tr
     key={item.id}
     className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-customPurpleLight"
@@ -73,6 +77,7 @@ const ParentListPage = async ({
   const { page, ...queryParams } = searchParams;
 
   const p = page ? Number(page) : 1;
+  const { role } = await getRole();
 
   // URL PARAMS CONDITION
   const query: Prisma.ParentWhereInput = {};
@@ -124,12 +129,16 @@ const ParentListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-customYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {role === "admin" && <FormModal table="teacher" type="create" />}
+            {role === "admin" && <FormModal table="parent" type="create" />}
           </div>
         </div>
       </div>
       {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={data} />
+      <Table
+        columns={columns(role)}
+        renderRow={(item: ParentList) => renderRow(item, role)}
+        data={data}
+      />
       {/* PAGINATION */}
       <Pagination page={p} count={count} />
     </div>

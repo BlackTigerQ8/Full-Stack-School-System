@@ -2,11 +2,11 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { lessonsData, role } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { ITEMS_PER_PAGE } from "@/lib/settings";
 import { Class, Lesson, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
+import { getRole } from "@/lib/utils";
 
 type LessonList = Lesson & {
   teacher: Teacher;
@@ -14,7 +14,7 @@ type LessonList = Lesson & {
   class: Class;
 };
 
-const columns = [
+const columns = (role: string | undefined) => [
   {
     header: "Subject Name",
     accessor: "name",
@@ -28,13 +28,17 @@ const columns = [
     accessor: "teacher",
     className: "hidden md:table-cell",
   },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
+  ...(role === "admin"
+    ? [
+        {
+          header: "Actions",
+          accessor: "action",
+        },
+      ]
+    : []),
 ];
 
-const renderRow = (item: LessonList) => (
+const renderRow = (item: LessonList, role: string | undefined) => (
   <tr
     key={item.id}
     className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-customPurpleLight"
@@ -65,6 +69,7 @@ const LessonListPage = async ({
   const { page, ...queryParams } = searchParams;
 
   const p = page ? Number(page) : 1;
+  const { role, currentUserId } = await getRole();
 
   // URL PARAMS CONDITION
   const query: Prisma.LessonWhereInput = {};
@@ -127,12 +132,18 @@ const LessonListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-customYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {role === "admin" && <FormModal table="lesson" type="create" />}
+            {(role === "admin" || role === "teacher") && (
+              <FormModal table="lesson" type="create" />
+            )}
           </div>
         </div>
       </div>
       {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={data} />
+      <Table
+        columns={columns(role)}
+        renderRow={(item: LessonList) => renderRow(item, role)}
+        data={data}
+      />
       {/* PAGINATION */}
       <Pagination page={p} count={count} />
     </div>

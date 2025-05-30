@@ -2,15 +2,15 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { classesData, role } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { ITEMS_PER_PAGE } from "@/lib/settings";
 import { Prisma, Class, Teacher } from "@prisma/client";
 import Image from "next/image";
+import { getRole } from "@/lib/utils";
 
 type ClassList = Class & { supervisor: Teacher };
 
-const columns = [
+const columns = (role: string | undefined) => [
   {
     header: "Class Name",
     accessor: "name",
@@ -30,13 +30,17 @@ const columns = [
     accessor: "supervisor",
     className: "hidden md:table-cell",
   },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
+  ...(role === "admin"
+    ? [
+        {
+          header: "Actions",
+          accessor: "action",
+        },
+      ]
+    : []),
 ];
 
-const renderRow = (item: ClassList) => (
+const renderRow = (item: ClassList, role: string | undefined) => (
   <tr
     key={item.id}
     className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-customPurpleLight"
@@ -71,6 +75,8 @@ const ClassListPage = async ({
 
   // URL PARAMS CONDITION
   const query: Prisma.ClassWhereInput = {};
+
+  const { role } = await getRole();
 
   // This part is to restrict the query to only the teachers that teach the class
   if (queryParams) {
@@ -128,7 +134,11 @@ const ClassListPage = async ({
         </div>
       </div>
       {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={data} />
+      <Table
+        columns={columns(role)}
+        renderRow={(item: ClassList) => renderRow(item, role)}
+        data={data}
+      />
       {/* PAGINATION */}
       <Pagination page={p} count={count} />
     </div>

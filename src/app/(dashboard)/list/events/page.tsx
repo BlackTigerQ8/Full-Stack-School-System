@@ -2,7 +2,7 @@ import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role } from "@/lib/data";
+import { getRole } from "@/lib/utils";
 import prisma from "@/lib/prisma";
 import { ITEMS_PER_PAGE } from "@/lib/settings";
 import { Class, Event, Prisma } from "@prisma/client";
@@ -10,7 +10,7 @@ import Image from "next/image";
 
 type EventList = Event & { class: Class };
 
-const columns = [
+const columns = (role: string | undefined) => [
   {
     header: "Title",
     accessor: "title",
@@ -34,19 +34,23 @@ const columns = [
     accessor: "endTime",
     className: "hidden md:table-cell",
   },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
+  ...(role === "admin"
+    ? [
+        {
+          header: "Actions",
+          accessor: "action",
+        },
+      ]
+    : []),
 ];
 
-const renderRow = (item: EventList) => (
+const renderRow = (item: EventList, role: string | undefined) => (
   <tr
     key={item.id}
     className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-customPurpleLight"
   >
     <td className="flex items-center gap-4 p-4">{item.title}</td>
-    <td>{item.class.name}</td>
+    <td>{item.class?.name || "-"}</td>
     <td className="hidden md:table-cell">
       {" "}
       {new Intl.DateTimeFormat("en-GB", {
@@ -90,6 +94,7 @@ const EventListPage = async ({
   const { page, ...queryParams } = searchParams;
 
   const p = page ? Number(page) : 1;
+  const { role, currentUserId } = await getRole();
 
   // URL PARAMS CONDITION
   const query: Prisma.EventWhereInput = {};
@@ -108,6 +113,20 @@ const EventListPage = async ({
       }
     }
   }
+
+  // ROLE CONDITIONS
+  const roleConditions = {
+    teacher: { lessons: { some: { teacherId: currentUserId! } } },
+    student: { students: { some: { id: currentUserId! } } },
+    parent: { students: { some: { parentId: currentUserId! } } },
+  };
+
+  query.OR = [
+    { classId: null },
+    {
+      class: roleConditions[role as keyof typeof roleConditions] || {},
+    },
+  ];
 
   const [data, count] = await prisma.$transaction([
     prisma.event.findMany({
@@ -142,7 +161,11 @@ const EventListPage = async ({
         </div>
       </div>
       {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={data} />
+      <Table
+        columns={columns(role)}
+        renderRow={(item: EventList) => renderRow(item, role)}
+        data={data}
+      />
       {/* PAGINATION */}
       <Pagination page={p} count={count} />
     </div>

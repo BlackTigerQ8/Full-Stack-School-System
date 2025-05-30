@@ -3,15 +3,15 @@ import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
 import { ITEMS_PER_PAGE } from "@/lib/settings";
-import { role } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { Class, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
 import Link from "next/link";
+import { getRole } from "@/lib/utils";
 
 type TeacherList = Teacher & { subjects: Subject[] } & { classes: Class[] };
 
-const columns = [
+const columns = (role: string | undefined) => [
   {
     header: "Info",
     accessor: "info",
@@ -41,13 +41,17 @@ const columns = [
     accessor: "address",
     className: "hidden lg:table-cell",
   },
-  {
-    header: "Actions",
-    accessor: "action",
-  },
+  ...(role === "admin"
+    ? [
+        {
+          header: "Actions",
+          accessor: "action",
+        },
+      ]
+    : []),
 ];
 
-const renderRow = (item: TeacherList) => (
+const renderRow = (item: TeacherList, role: string | undefined) => (
   <tr
     key={item.id}
     className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-customPurpleLight"
@@ -100,6 +104,7 @@ const TeacherListPage = async ({
   const { page, ...queryParams } = searchParams;
 
   const p = page ? Number(page) : 1;
+  const { role } = await getRole();
 
   // URL PARAMS CONDITION
   const query: Prisma.TeacherWhereInput = {};
@@ -175,7 +180,11 @@ const TeacherListPage = async ({
         </div>
       </div>
       {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={data} />
+      <Table
+        columns={columns(role)}
+        renderRow={(item: TeacherList) => renderRow(item, role)}
+        data={data}
+      />
       {/* PAGINATION */}
       <Pagination page={Number(page)} count={count} />
     </div>
