@@ -1,8 +1,18 @@
-import { auth } from "@clerk/nextjs/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "./auth";
 
 export const getRole = async () => {
-  const { userId, sessionClaims } = await auth();
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-  const currentUserId = userId;
-  return { currentUserId, role };
+  const session = await getServerSession(authOptions);
+
+  if (!session?.user) {
+    return {
+      currentUserId: null,
+      role: null,
+    };
+  }
+
+  return {
+    currentUserId: session.user.id,
+    role: session.user.role?.toLowerCase(),
+  };
 };

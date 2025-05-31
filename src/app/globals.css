@@ -2,6 +2,59 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom animations and utilities */
+@layer utilities {
+  .animate-gradient {
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+  }
+
+  .glass-effect {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .card-shadow {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+      0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  }
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 active:scale-95;
+  }
+
+  .btn-secondary {
+    @apply bg-white hover:bg-gray-50 text-gray-700 font-medium py-2 px-4 rounded-lg border border-gray-300 transition-all duration-200 transform hover:scale-105 active:scale-95;
+  }
+
+  .input-primary {
+    @apply w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200 placeholder-gray-400;
+  }
+
+  .card-primary {
+    @apply bg-white rounded-xl shadow-lg border border-gray-100 p-6;
+  }
+
+  .card-gradient {
+    @apply bg-gradient-to-br from-white via-blue-50 to-indigo-50 rounded-xl shadow-lg border border-white/20 p-6;
+  }
+}
+
 .react-calendar {
   width: 100% !important;
   border: none !important;
@@ -120,41 +173,4 @@ div[class*="Footer" i] {
   visibility: hidden !important;
   height: 0 !important;
   overflow: hidden !important;
-}
-
-/* Target all Clerk elements containing branding text */
-[class*="cl-"]:has-text("Secured by"),
-[class*="cl-"]:has-text("Development mode"),
-[class*="cl-"]:has-text("clerk") {
-  display: none !important;
-}
-
-/* Alternative text-based targeting */
-*:contains("Secured by"),
-*:contains("Development mode") {
-  display: none !important;
-}
-
-/* Specific targeting for modal containers */
-.cl-modal .cl-footer,
-.cl-modalContent .cl-footer,
-.cl-userProfile .cl-footer,
-.cl-card .cl-footer,
-div[data-clerk-modal] .cl-footer,
-div[role="dialog"] .cl-footer {
-  display: none !important;
-}
-
-/* Hide any element at the bottom of Clerk modals that might contain branding */
-.cl-modal > div:last-child,
-.cl-modalContent > div:last-child,
-.cl-card > div:last-child {
-  display: none !important;
-}
-
-/* Reset the above rule for elements that shouldn't be hidden */
-.cl-modal > div:last-child:not([class*="footer" i]),
-.cl-modalContent > div:last-child:not([class*="footer" i]),
-.cl-card > div:last-child:not([class*="footer" i]) {
-  display: block !important;
 }

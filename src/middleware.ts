@@ -1,33 +1,33 @@
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { routeAccessMap } from "./lib/settings";
+import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import { routeAccessMap } from "./lib/settings";
 
-const matchers = Object.keys(routeAccessMap).map((route) => ({
-  matcher: createRouteMatcher([route]),
-  allowedRoles: routeAccessMap[route],
-}));
+export default withAuth(
+  function middleware(req) {
+    const token = req.nextauth.token;
+    const role = token?.role?.toLowerCase();
 
-// console.log(matchers);
-
-export default clerkMiddleware(async (auth, req) => {
-  // if (isProtectedRoute(req)) auth().protect()
-
-  const { sessionClaims } = await auth();
-
-  const role = (sessionClaims?.metadata as { role?: string })?.role;
-
-  for (const { matcher, allowedRoles } of matchers) {
-    if (matcher(req) && !allowedRoles.includes(role!)) {
-      return NextResponse.redirect(new URL(`/${role}`, req.url));
+    // Check route access
+    for (const [route, allowedRoles] of Object.entries(routeAccessMap)) {
+      const routeRegex = new RegExp(`^${route.replace("(.*)", ".*")}$`);
+      if (routeRegex.test(req.nextUrl.pathname)) {
+        if (!allowedRoles.includes(role!)) {
+          return NextResponse.redirect(new URL(`/${role}`, req.url));
+        }
+        // IMPORTANT: Break after first match to prevent further checking
+        break;
+      }
     }
+  },
+  {
+    callbacks: {
+      authorized: ({ token }) => !!token,
+    },
   }
-});
+);
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-    // Always run for API routes
-    "/(api|trpc)(.*)",
+    "/((?!api/auth|_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
   ],
 };

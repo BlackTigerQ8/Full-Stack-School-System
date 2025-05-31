@@ -1,10 +1,55 @@
 import Image from "next/image";
-import { UserButton } from "@clerk/nextjs";
-import { currentUser } from "@clerk/nextjs/server";
+import { getServerSession } from "next-auth";
+import { authOptions } from "@/lib/auth";
+import prisma from "@/lib/prisma";
+
+const getUserProfileImage = async (
+  userId: string,
+  role: string
+): Promise<string | null> => {
+  try {
+    switch (role.toLowerCase()) {
+      case "admin":
+        // Admin doesn't have img field in schema, return null
+        return null;
+
+      case "teacher":
+        const teacher = await prisma.teacher.findUnique({
+          where: { id: userId },
+          select: { img: true },
+        });
+        return teacher?.img || null;
+
+      case "student":
+        const student = await prisma.student.findUnique({
+          where: { id: userId },
+          select: { img: true },
+        });
+        return student?.img || null;
+
+      case "parent":
+        // Parent doesn't have img field in schema, return null
+        return null;
+
+      default:
+        return null;
+    }
+  } catch (error) {
+    console.error("Error fetching user profile image:", error);
+    return null;
+  }
+};
 
 const Navbar = async () => {
-  const user = await currentUser();
-  const role = user?.publicMetadata.role as string;
+  const session = await getServerSession(authOptions);
+  const user = session?.user;
+  const role = user?.role;
+
+  // Fetch user profile image
+  let userImage: string | null = null;
+  if (user?.id && role) {
+    userImage = await getUserProfileImage(user.id, role);
+  }
 
   return (
     <div className="flex items-center justify-between p-4">
@@ -30,20 +75,19 @@ const Navbar = async () => {
         </div>
         <div className="flex flex-col">
           <span className="text-xs leading-3 font-medium">
-            {user?.firstName} {user?.lastName}
+            {user?.username || user?.email}
           </span>
           <span className="text-[10px] text-gray-500 text-right">
-            {role.charAt(0).toUpperCase() + role.slice(1)}
+            {role ? role.charAt(0).toUpperCase() + role.slice(1) : "User"}
           </span>
         </div>
-        {/* <Image
-          src="/avatar.png"
+        <Image
+          src={userImage || "/avatar.png"}
           alt=""
           width={36}
           height={36}
           className="rounded-full"
-        /> */}
-        <UserButton />
+        />
       </div>
     </div>
   );

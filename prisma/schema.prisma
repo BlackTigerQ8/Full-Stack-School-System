@@ -7,9 +7,25 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  password  String // Will store hashed password
+  role      UserRole
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  admin     Admin?   @relation("UserAdmin")
+  student   Student? @relation("UserStudent")
+  teacher   Teacher? @relation("UserTeacher")
+  parent    Parent?  @relation("UserParent")
+}
+
 model Admin {
   id       String @id
   username String @unique
+  civilId  String @unique
+  user     User?  @relation("UserAdmin", fields: [id], references: [id], onDelete: Cascade)
 }
 
 model Student {
@@ -17,6 +33,7 @@ model Student {
   username    String       @unique
   name        String
   surname     String
+  civilId     String       @unique
   email       String?      @unique
   phone       String?      @unique
   address     String
@@ -33,6 +50,7 @@ model Student {
   attendances Attendance[]
   results     Result[]
   birthday    DateTime
+  user        User?        @relation("UserStudent", fields: [id], references: [id], onDelete: Cascade)
 }
 
 model Teacher {
@@ -40,6 +58,7 @@ model Teacher {
   username  String    @unique
   name      String
   surname   String
+  civilId   String    @unique
   email     String?   @unique
   phone     String?   @unique
   address   String
@@ -51,6 +70,7 @@ model Teacher {
   lessons   Lesson[]
   classes   Class[]
   birthday  DateTime
+  user      User?     @relation("UserTeacher", fields: [id], references: [id], onDelete: Cascade)
 }
 
 model Parent {
@@ -58,11 +78,13 @@ model Parent {
   username  String    @unique
   name      String
   surname   String
+  civilId   String    @unique
   email     String?   @unique
   phone     String    @unique
   address   String
   createdAt DateTime  @default(now())
   students  Student[]
+  user      User?     @relation("UserParent", fields: [id], references: [id], onDelete: Cascade)
 }
 
 model Grade {
@@ -190,4 +212,11 @@ enum Day {
   TUESDAY
   WEDNESDAY
   THURSDAY
+}
+
+enum UserRole {
+  admin
+  student
+  teacher
+  parent
 }
