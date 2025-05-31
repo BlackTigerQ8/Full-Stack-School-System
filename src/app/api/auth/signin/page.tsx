@@ -273,6 +273,15 @@ export default function Login() {
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500">
             © 2025 BlackTigerQ8 School Management System
+            <br />
+            Developed by{" "}
+            <a
+              href="https://github.com/blacktigerq8"
+              className="text-indigo-600 hover:text-indigo-500 font-medium"
+              target="_blank"
+            >
+              Eng. Abdullah Alenezi
+            </a>
           </p>
         </div>
       </div>

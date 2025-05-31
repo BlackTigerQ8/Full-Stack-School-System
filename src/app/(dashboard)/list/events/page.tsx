@@ -53,21 +53,21 @@ const renderRow = (item: EventList, role: string | undefined) => (
     <td>{item.class?.name || "-"}</td>
     <td className="hidden md:table-cell">
       {" "}
-      {new Intl.DateTimeFormat("en-GB", {
+      {new Intl.DateTimeFormat("ar-GB", {
         year: "numeric",
         month: "numeric",
         day: "numeric",
       }).format(item.startTime)}
     </td>
     <td className="hidden md:table-cell">
-      {item.startTime.toLocaleTimeString("en-GB", {
+      {item.startTime.toLocaleTimeString("ar-GB", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,
       })}
     </td>
     <td className="hidden md:table-cell">
-      {item.endTime.toLocaleTimeString("en-GB", {
+      {item.endTime.toLocaleTimeString("ar-GB", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: true,
@@ -162,8 +162,8 @@ const EventListPage = async ({
       </div>
       {/* LIST */}
       <Table
-        columns={columns(role)}
-        renderRow={(item: EventList) => renderRow(item, role)}
+        columns={columns(role || undefined)}
+        renderRow={(item: EventList) => renderRow(item, role || undefined)}
         data={data}
       />
       {/* PAGINATION */}
