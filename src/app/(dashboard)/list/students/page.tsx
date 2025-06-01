@@ -166,11 +166,13 @@ const StudentListPage = async ({
         </div>
       </div>
       {/* LIST */}
-      <Table
-        columns={columns(role)}
-        renderRow={(item: StudentList) => renderRow(item, role)}
-        data={data}
-      />
+      {role && (
+        <Table
+          columns={columns(role)}
+          renderRow={(item: StudentList) => renderRow(item, role)}
+          data={data}
+        />
+      )}
       {/* PAGINATION */}
       <Pagination page={p} count={count} />
     </div>

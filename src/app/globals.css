@@ -161,7 +161,7 @@
 }
 
 /* Hide all possible Clerk footer variations */
-.cl-footer,
+/* .cl-footer,
 .cl-modalFooter,
 .cl-userButtonPopoverFooter,
 .cl-profileSectionFooter,
@@ -173,4 +173,10 @@ div[class*="Footer" i] {
   visibility: hidden !important;
   height: 0 !important;
   overflow: hidden !important;
+} */
+
+/* Big Calendar Styling */
+.rbc-time-header {
+  display: flex !important;
+  background-color: #f8fafc !important;
 }
