@@ -38,3 +38,8 @@ next-env.d.ts
 
 # clerk configuration (can include secrets)
 /.clerk/
+
+# Upload directory (don't commit uploaded images)
+/public/uploads/*
+# But keep the directory structure
+!/public/uploads/.gitkeep
