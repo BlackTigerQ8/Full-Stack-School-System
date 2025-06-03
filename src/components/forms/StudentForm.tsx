@@ -6,9 +6,10 @@ import InputField from "../InputField";
 import { studentSchema, StudentSchema } from "@/lib/formValidationSchemas";
 import { createStudent, updateStudent } from "@/lib/actions";
 import { useFormState } from "react-dom";
-import { Dispatch, SetStateAction, useEffect } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
+import ImageUpload from "../ImageUpload";
 
 const StudentForm = ({
   type,
@@ -37,17 +38,53 @@ const StudentForm = ({
     }
   );
 
-  const onSubmit = handleSubmit((data) => {
-    formAction(data);
+  const [img, setImg] = useState<any>();
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string>(data?.img || "");
+
+  const handleImageSelect = (file: File, preview: string) => {
+    setSelectedImage(file);
+    setImagePreview(preview);
+  };
+
+  const uploadImage = async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = await response.json();
+    return result.imageUrl;
+  };
+
+  const onSubmit = handleSubmit(async (data) => {
+    let imageUrl = imagePreview;
+
+    if (selectedImage) {
+      imageUrl = await uploadImage(selectedImage);
+    }
+
+    formAction({ ...data, img: imageUrl });
   });
 
   const router = useRouter();
 
   useEffect(() => {
+    console.log("StudentForm state:", state);
     if (state.success) {
-      toast(`Student has been ${type === "create" ? "created" : "updated"}!`);
+      console.log("StudentForm success detected - showing toast");
+      toast.success(
+        `Student has been ${type === "create" ? "created" : "updated"}!`
+      );
       setOpen(false);
       router.refresh();
+    }
+    if (state.error) {
+      console.log("StudentForm error detected - showing error toast");
+      toast.error("Something went wrong!");
     }
   }, [state, router, type, setOpen]);
 
@@ -90,15 +127,14 @@ const StudentForm = ({
           error={errors?.email}
           type="email"
         />
-        {type === "create" && (
-          <InputField
-            label="Password"
-            name="password"
-            register={register}
-            error={errors?.password}
-            type="password"
-          />
-        )}
+        <InputField
+          label="Password"
+          name="password"
+          defaultValue=""
+          register={register}
+          error={errors?.password}
+          type="password"
+        />
       </div>
 
       <span className="text-xs text-gray-400 font-medium">
@@ -254,12 +290,10 @@ const StudentForm = ({
             </p>
           )}
         </div>
-        <InputField
-          label="Profile Image URL"
-          name="img"
-          defaultValue={data?.img}
-          register={register}
-          error={errors?.img}
+        <ImageUpload
+          onImageSelect={handleImageSelect}
+          currentImage={data?.img}
+          className="w-full md:w-1/2"
         />
         {data && (
           <InputField

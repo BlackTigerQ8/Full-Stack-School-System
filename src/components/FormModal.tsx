@@ -220,10 +220,16 @@ const FormModal = ({
     const router = useRouter();
 
     useEffect(() => {
+      console.log("Delete state changed:", state, "for table:", table);
       if (state.success) {
-        toast(`${table} has been deleted!`);
+        console.log("Delete success state detected, showing toast");
+        toast.success(`${table} has been deleted!`);
         setOpen(false);
         router.refresh();
+      }
+      if (state.error) {
+        console.log("Delete error state detected");
+        toast.error("Failed to delete. Something went wrong!");
       }
     }, [state, router]);
 

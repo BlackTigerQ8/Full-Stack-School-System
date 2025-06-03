@@ -69,6 +69,7 @@ const TeacherForm = ({
     }
 
     formAction({ ...data, img: imageUrl });
+    console.log(state);
   });
 
   const router = useRouter();
@@ -113,7 +114,7 @@ const TeacherForm = ({
           label="Password"
           name="password"
           type="password"
-          defaultValue={data?.password}
+          defaultValue=""
           register={register}
           error={errors?.password}
         />
@@ -135,6 +136,13 @@ const TeacherForm = ({
           defaultValue={data?.surname}
           register={register}
           error={errors.surname}
+        />
+        <InputField
+          label="Civil ID"
+          name="civilId"
+          defaultValue={data?.civilId}
+          register={register}
+          error={errors?.civilId}
         />
         <InputField
           label="Phone"
@@ -227,7 +235,7 @@ const TeacherForm = ({
         <ImageUpload
           onImageSelect={handleImageSelect}
           currentImage={data?.img}
-          className="w-full md:w-1/4"
+          className="w-full"
         />
       </div>
       {state.error && (

@@ -26,20 +26,35 @@ export const createSubject = async (
   currentState: CurrentState,
   data: SubjectSchema
 ) => {
+  console.log("createSubject called with:", { currentState, data });
   try {
+    // Ensure teachers is an array and filter out empty values
+    const teacherIds = (data.teachers || []).filter(
+      (id) => id && id.trim() !== ""
+    );
+
+    console.log("Processed teacher IDs:", teacherIds);
+
+    const subjectData: any = {
+      name: data.name,
+    };
+
+    // Only connect teachers if there are valid teacher IDs
+    if (teacherIds.length > 0) {
+      subjectData.teachers = {
+        connect: teacherIds.map((teacherId) => ({ id: teacherId })),
+      };
+    }
+
     await prisma.subject.create({
-      data: {
-        name: data.name,
-        teachers: {
-          connect: data.teachers.map((teacherId) => ({ id: teacherId })),
-        },
-      },
+      data: subjectData,
     });
 
     revalidatePath("/list/subjects");
+    console.log("createSubject success");
     return { success: true, error: false };
   } catch (err) {
-    console.log(err);
+    console.log("createSubject error:", err);
     return { success: false, error: true };
   }
 };
@@ -336,6 +351,7 @@ export const createStudent = async (
   currentState: CurrentState,
   data: StudentSchema
 ) => {
+  console.log(data);
   try {
     const classItem = await prisma.class.findUnique({
       where: { id: data.classId },

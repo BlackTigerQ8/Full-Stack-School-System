@@ -81,13 +81,15 @@ const Navbar = async () => {
             {role ? role.charAt(0).toUpperCase() + role.slice(1) : "User"}
           </span>
         </div>
-        <Image
-          src={userImage || "/avatar.png"}
-          alt=""
-          width={36}
-          height={36}
-          className="rounded-full"
-        />
+        <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100">
+          <Image
+            src={userImage || "/avatar.png"}
+            alt=""
+            width={36}
+            height={36}
+            className="w-full h-full object-cover"
+          />
+        </div>
       </div>
     </div>
   );

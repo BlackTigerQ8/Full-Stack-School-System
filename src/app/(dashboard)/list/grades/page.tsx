@@ -1,46 +1,53 @@
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
-import { role, subjectsData } from "@/lib/data";
 import prisma from "@/lib/prisma";
 import { ITEMS_PER_PAGE } from "@/lib/settings";
-import { Prisma, Subject, Teacher } from "@prisma/client";
+import { Grade, Prisma } from "@prisma/client";
 import Image from "next/image";
+import { getRole } from "@/lib/utils";
 import FormContainer from "@/components/FormContainer";
 
-type SubjectList = Subject & { teachers: Teacher[] };
+type GradeList = Grade & {
+  _count: {
+    students: number;
+    classess: number;
+  };
+};
 
 const columns = [
+  { header: "Grade Level", accessor: "level" },
   {
-    header: "Subject Name",
-    accessor: "name",
-  },
-  {
-    header: "Teachers",
-    accessor: "teachers",
+    header: "Classes",
+    accessor: "classCount",
     className: "hidden md:table-cell",
   },
   {
-    header: "Actions",
-    accessor: "action",
+    header: "Students",
+    accessor: "studentCount",
+    className: "hidden md:table-cell",
   },
+  { header: "Actions", accessor: "action" },
 ];
 
-const renderRow = (item: SubjectList) => (
+const renderRow = (item: GradeList, role: string | undefined) => (
   <tr
     key={item.id}
     className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-customPurpleLight"
   >
-    <td className="flex items-center gap-4 p-4">{item.name}</td>
-    <td className="hidden md:table-cell">
-      {item.teachers.map((teacher) => teacher.name).join(", ")}
+    <td className="flex items-center gap-4 p-4">
+      <div className="flex flex-col">
+        <h3 className="font-semibold">Grade {item.level}</h3>
+      </div>
     </td>
+    <td className="hidden md:table-cell">{item._count.classess}</td>
+    <td className="hidden md:table-cell">{item._count.students}</td>
     <td>
       <div className="flex items-center gap-2">
         {role === "admin" && (
           <>
-            <FormContainer table="subject" type="update" data={item} />
-            <FormContainer table="subject" type="delete" id={item.id} />
+            <FormContainer table="grade" type="update" data={item} />
+            <FormContainer table="grade" type="delete" id={item.id} />
           </>
         )}
       </div>
@@ -48,56 +55,41 @@ const renderRow = (item: SubjectList) => (
   </tr>
 );
 
-const SubjectListPage = async ({
+const GradeListPage = async ({
   searchParams,
 }: {
   searchParams: { [key: string]: string | undefined };
 }) => {
   const { page, ...queryParams } = searchParams;
+  const p = page ? parseInt(page) : 1;
+  const role = await getRole();
 
-  const p = page ? Number(page) : 1;
-
-  // URL PARAMS CONDITION
-  const query: Prisma.SubjectWhereInput = {};
-
-  // This part is to restrict the query to only the teachers that teach the class
-  if (queryParams) {
-    for (const [key, value] of Object.entries(queryParams)) {
-      if (value !== undefined) {
-        switch (key) {
-          case "search": {
-            query.name = {
-              contains: value.trim(),
-              mode: "insensitive",
-            };
-            break;
-          }
-          default:
-            break;
-        }
-      }
-    }
-  }
+  // Build query for search
+  const query: Prisma.GradeWhereInput = {};
 
   const [data, count] = await prisma.$transaction([
-    prisma.subject.findMany({
+    prisma.grade.findMany({
       where: query,
       include: {
-        teachers: true,
+        _count: {
+          select: {
+            students: true,
+            classess: true,
+          },
+        },
       },
+      orderBy: { level: "asc" },
       take: ITEMS_PER_PAGE,
-      skip: ITEMS_PER_PAGE * (Number(p) - 1),
+      skip: ITEMS_PER_PAGE * (p - 1),
     }),
-    prisma.subject.count({
-      where: query,
-    }),
+    prisma.grade.count({ where: query }),
   ]);
 
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">
       {/* TOP */}
       <div className="flex items-center justify-between">
-        <h1 className="hidden md:block text-lg font-semibold">All Subjects</h1>
+        <h1 className="hidden md:block text-lg font-semibold">All Grades</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
@@ -107,18 +99,24 @@ const SubjectListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-customYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {role === "admin" && (
-              <FormContainer table="subject" type="create" />
+            {role && role.role === "admin" && (
+              <FormContainer table="grade" type="create" />
             )}
           </div>
         </div>
       </div>
       {/* LIST */}
-      <Table columns={columns} renderRow={renderRow} data={data} />
+      <Table
+        columns={columns}
+        renderRow={(item: GradeList) =>
+          renderRow(item, role?.role || undefined)
+        }
+        data={data}
+      />
       {/* PAGINATION */}
       <Pagination page={p} count={count} />
     </div>
   );
 };
 
-export default SubjectListPage;
+export default GradeListPage;

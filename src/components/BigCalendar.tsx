@@ -8,7 +8,7 @@ import { useState } from "react";
 // Configure moment for Kuwait work week (Sunday-Thursday)
 moment.updateLocale("en", {
   week: {
-    dow: 0, // Sunday is the first day of the week
+    dow: 0,
     doy: 6,
   },
 });
@@ -32,7 +32,7 @@ const BigCalendar = ({
       events={data}
       startAccessor="start"
       endAccessor="end"
-      views={["week", "work_week", "day"]}
+      views={["week", "day"]} // "work_week"
       view={view}
       style={{ height: "98%" }}
       onView={handleOnChangeView}

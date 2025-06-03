@@ -1,4 +1,3 @@
-import FormModal from "@/components/FormModal";
 import Pagination from "@/components/Pagination";
 import Table from "@/components/Table";
 import TableSearch from "@/components/TableSearch";
@@ -7,6 +6,7 @@ import { ITEMS_PER_PAGE } from "@/lib/settings";
 import { Exam, Prisma, Class } from "@prisma/client";
 import Image from "next/image";
 import { getRole } from "@/lib/utils";
+import FormContainer from "@/components/FormContainer";
 
 type ExamList = Exam & {
   lesson: {
@@ -66,8 +66,8 @@ const renderRow = (item: ExamList, role: string | undefined) => (
       <div className="flex items-center gap-2">
         {(role === "admin" || role === "teacher") && (
           <>
-            <FormModal table="exam" type="update" data={item} />
-            <FormModal table="exam" type="delete" id={item.id} />
+            <FormContainer table="exam" type="update" data={item} />
+            <FormContainer table="exam" type="delete" id={item.id} />
           </>
         )}
       </div>
@@ -177,15 +177,15 @@ const ExamListPage = async ({
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
             {(role === "admin" || role === "teacher") && (
-              <FormModal table="exam" type="create" />
+              <FormContainer table="exam" type="create" />
             )}
           </div>
         </div>
       </div>
       {/* LIST */}
       <Table
-        columns={columns(role)}
-        renderRow={(item: ExamList) => renderRow(item, role)}
+        columns={columns(role || undefined)}
+        renderRow={(item: ExamList) => renderRow(item, role || undefined)}
         data={data}
       />
       {/* PAGINATION */}

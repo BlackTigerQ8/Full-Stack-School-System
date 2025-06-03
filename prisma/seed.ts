@@ -77,11 +77,8 @@ const lastNames = [
   "الرشيد",
   "الشمري",
   "الدوسري",
-  "القحطاني",
-  "الغامدي",
-  "الزهراني",
-  "الجهني",
-  "البلوي",
+  "الظفيري",
+  "الماجدي",
   "الثبيتي",
   "السبيعي",
   "الخالدي",
@@ -173,7 +170,7 @@ function createLessonSchedule() {
   }[] = [];
 
   // Define time slots (8 AM to 3 PM, 1-hour slots)
-  const timeSlots = [8, 9, 10, 11, 12, 13, 14, 15];
+  const timeSlots = [7, 8, 9, 10, 11, 12, 13];
 
   // Days of the week (Kuwait work week)
   const workDays = [
@@ -379,14 +376,7 @@ async function main() {
   }
 
   // CLASSES
-  const classNames = [
-    "الأولى أ",
-    "الثانية أ",
-    "الثالثة أ",
-    "الرابعة أ",
-    "الخامسة أ",
-    "السادسة أ",
-  ];
+  const classNames = ["10/1", "11/2", "12/3", "10/3", "11/1", "12/1", "10/2"];
   for (let i = 1; i <= 6; i++) {
     await prisma.class.create({
       data: {
@@ -607,9 +597,9 @@ async function main() {
   console.log("Seeding completed successfully.");
 }
 
-console.log("تم إنشاء البيانات بنجاح - Seeding completed successfully!");
-console.log("المسؤولين: admin1, admin2");
-console.log("كلمة المرور للجميع: 123123");
+console.log("Seeding completed successfully!");
+console.log("Admins: admin1, admin2");
+console.log("Password for all: 123123");
 
 main()
   .then(async () => {

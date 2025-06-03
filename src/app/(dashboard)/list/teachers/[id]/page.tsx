@@ -1,6 +1,7 @@
 import Announcements from "@/components/Announcements";
 import BigCalendar from "@/components/BigCalendar";
 import BigCalendarContainer from "@/components/BigCalendarContainer";
+import FormContainer from "@/components/FormContainer";
 import FormModal from "@/components/FormModal";
 import Performance from "@/components/Performance";
 import { role } from "@/lib/data";
@@ -45,7 +46,7 @@ const SingleTeacherPage = async ({
           <div className="bg-customSky py-6 px-4 rounded-md flex-1 flex gap-4">
             <div className="w-1/3">
               <Image
-                src="https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=1200"
+                src={teacher.img || "/noAvatar.png"}
                 alt=""
                 width={144}
                 height={144}
@@ -54,48 +55,54 @@ const SingleTeacherPage = async ({
             </div>
             <div className="w-2/3 flex flex-col justify-between gap-4">
               <div className="flex items-center gap-4">
-                <h1 className="text-xl font-semibold">Abdullah Alenezi</h1>
+                <h1 className="text-xl font-semibold">
+                  {teacher.name} {teacher.surname}
+                </h1>
                 {role === "admin" && (
-                  <FormModal
+                  <FormContainer
                     table="teacher"
                     type="update"
                     data={{
-                      id: 1,
-                      username: "blacktigerq8",
-                      email: "blacktigerq8@gmail.com",
+                      id: teacher.id,
+                      username: teacher.username,
+                      email: teacher.email,
                       password: "password",
-                      firstName: "Abdullah",
-                      lastName: "Alenezi",
-                      phone: "+965 66850080",
-                      address:
-                        "Kuwait, Jaber Al-Ahmad, Block 6, Street 665, House 244, Unit 8",
-                      bloodType: "B-",
-                      dateOfBirth: "1995-07-21",
-                      sex: "male",
-                      img: "https://images.pexels.com/photos/2182970/pexels-photo-2182970.jpeg?auto=compress&cs=tinysrgb&w=1200",
+                      name: teacher.name,
+                      surname: teacher.surname,
+                      civilId: teacher.civilId,
+                      phone: teacher.phone,
+                      address: teacher.address,
+                      bloodType: teacher.bloodType,
+                      birthday: teacher.birthday,
+                      sex: teacher.sex,
+                      img: teacher.img,
                     }}
                   />
                 )}
               </div>
-              <p className="text-sm text-gray-500">
-                Bachelor of Science in Civil Engineering.
-              </p>
+              <p className="text-sm text-gray-500">{teacher.civilId}</p>
               <div className="flex items-center justify-between gap-2 flex-wrap text-xs font-medium">
                 <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
                   <Image src="/blood.png" alt="" width={14} height={14} />
-                  <span>B-</span>
+                  <span>{teacher.bloodType}</span>
                 </div>
                 <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
                   <Image src="/date.png" alt="" width={14} height={14} />
-                  <span>July 2025</span>
+                  <span>
+                    {teacher.birthday.toLocaleDateString("en-GB", {
+                      day: "2-digit",
+                      month: "2-digit",
+                      year: "numeric",
+                    })}
+                  </span>
                 </div>
                 <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
                   <Image src="/mail.png" alt="" width={14} height={14} />
-                  <span>blacktigerq8@gmail.com</span>
+                  <span>{teacher.email}</span>
                 </div>
                 <div className="w-full md:w-1/3 lg:w-full 2xl:w-1/3 flex items-center gap-2">
                   <Image src="/phone.png" alt="" width={14} height={14} />
-                  <span>+965 66850080</span>
+                  <span>+965 {teacher.phone}</span>
                 </div>
               </div>
             </div>
@@ -126,8 +133,10 @@ const SingleTeacherPage = async ({
                 className="w-6 h-6"
               />
               <div className="">
-                <h1 className="text-xl font-semibold">2</h1>
-                <span className="text-sm text-gray-400">Branches</span>
+                <h1 className="text-xl font-semibold">
+                  {teacher._count.subjects}
+                </h1>
+                <span className="text-sm text-gray-400">Subjects</span>
               </div>
             </div>
             {/* CARD */}
@@ -140,7 +149,9 @@ const SingleTeacherPage = async ({
                 className="w-6 h-6"
               />
               <div className="">
-                <h1 className="text-xl font-semibold">6</h1>
+                <h1 className="text-xl font-semibold">
+                  {teacher._count.lessons}
+                </h1>
                 <span className="text-sm text-gray-400">Lessons</span>
               </div>
             </div>
@@ -154,7 +165,9 @@ const SingleTeacherPage = async ({
                 className="w-6 h-6"
               />
               <div className="">
-                <h1 className="text-xl font-semibold">6</h1>
+                <h1 className="text-xl font-semibold">
+                  {teacher._count.classes}
+                </h1>
                 <span className="text-sm text-gray-400">Classes</span>
               </div>
             </div>
@@ -173,31 +186,31 @@ const SingleTeacherPage = async ({
           <div className="mt-4 flex gap-4 flex-wrap text-xs text-gray-500">
             <Link
               className="p-3 rounded-md bg-customSkyLight"
-              href={`/list/classes?supervisorId=${"teacher2"}`}
+              href={`/list/classes?supervisorId=${teacher.id}`}
             >
               Teacher&apos;s Classes
             </Link>
             <Link
               className="p-3 rounded-md bg-customPurpleLight"
-              href={`/list/students?teacherId=${"teacher2"}`}
+              href={`/list/students?teacherId=${teacher.id}`}
             >
               Teacher&apos;s Students
             </Link>
             <Link
               className="p-3 rounded-md bg-customYellowLight"
-              href={`/list/lessons?teacherId=${"teacher2"}`}
+              href={`/list/lessons?teacherId=${teacher.id}`}
             >
               Teacher&apos;s Lessons
             </Link>
             <Link
               className="p-3 rounded-md bg-pink-50"
-              href={`/list/exams?teacherId=${"teacher2"}`}
+              href={`/list/exams?teacherId=${teacher.id}`}
             >
               Teacher&apos;s Exams
             </Link>
             <Link
               className="p-3 rounded-md bg-customSkyLight"
-              href={`/list/assignments?teacherId=${"teacher2"}`}
+              href={`/list/assignments?teacherId=${teacher.id}`}
             >
               Teacher&apos;s Assignments
             </Link>
