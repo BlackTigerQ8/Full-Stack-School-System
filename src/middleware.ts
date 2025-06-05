@@ -7,6 +7,19 @@ export default withAuth(
     const token = req.nextauth.token;
     const role = token?.role?.toLowerCase();
 
+    // Get locale from cookie or default to 'ar'
+    const locale = req.cookies.get("NEXT_LOCALE")?.value || "ar";
+
+    // Set locale cookie if not exists
+    const response = NextResponse.next();
+    if (!req.cookies.get("NEXT_LOCALE")) {
+      response.cookies.set("NEXT_LOCALE", "ar");
+    }
+
+    // Set HTML lang and dir attributes via headers
+    response.headers.set("x-locale", locale);
+    response.headers.set("x-dir", locale === "ar" ? "rtl" : "ltr");
+
     // Check route access
     for (const [route, allowedRoles] of Object.entries(routeAccessMap)) {
       const routeRegex = new RegExp(`^${route.replace("(.*)", ".*")}$`);
@@ -27,7 +40,5 @@ export default withAuth(
 );
 
 export const config = {
-  matcher: [
-    "/((?!api/auth|_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-  ],
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|auth).*)"],
 };

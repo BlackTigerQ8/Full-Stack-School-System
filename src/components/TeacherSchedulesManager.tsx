@@ -63,6 +63,9 @@ const TeacherSchedulesManager = ({
     new Date().toISOString().split("T")[0]
   );
   const [loading, setLoading] = useState(false);
+  const [selectedReplacements, setSelectedReplacements] = useState<{
+    [lessonId: number]: string;
+  }>({});
 
   const today = new Date().toDateString();
   const isToday = new Date(selectedDate).toDateString() === today;
@@ -142,11 +145,11 @@ const TeacherSchedulesManager = ({
     return weeklyLessons * 0.6 + (1 - attendanceRate) * 0.4;
   };
 
-  // Find best replacement teacher
-  const findBestReplacement = (
+  // Find all available replacement teachers for a given lesson
+  const getAvailableReplacements = (
     originalTeacherId: string,
     lessonTime: string
-  ): Teacher | null => {
+  ): Teacher[] => {
     const presentTeachers = teachers.filter((teacher) => {
       const attendanceStatus = getTeacherAttendanceStatus(teacher.id);
       return (
@@ -155,7 +158,7 @@ const TeacherSchedulesManager = ({
       );
     });
 
-    if (presentTeachers.length === 0) return null;
+    if (presentTeachers.length === 0) return [];
 
     // Filter out teachers who already have lessons at this time
     const [startTime] = lessonTime.split("-");
@@ -167,13 +170,37 @@ const TeacherSchedulesManager = ({
       );
     });
 
-    if (availableTeachers.length === 0) return null;
-
-    // Sort by priority and return the best candidate
+    // Sort by priority (best candidates first)
     return availableTeachers.sort(
       (a, b) =>
         calculateReplacementPriority(a) - calculateReplacementPriority(b)
-    )[0];
+    );
+  };
+
+  // Handle dropdown selection change
+  const handleReplacementSelection = (lessonId: number, teacherId: string) => {
+    setSelectedReplacements((prev) => ({
+      ...prev,
+      [lessonId]: teacherId,
+    }));
+  };
+
+  // Modified assignment handler to use selected replacement
+  const handleAssignSelectedReplacement = async (
+    lessonId: number,
+    originalTeacherId: string
+  ) => {
+    const selectedTeacherId = selectedReplacements[lessonId];
+    if (!selectedTeacherId) {
+      toast.error("Please select a replacement teacher");
+      return;
+    }
+
+    await handleAssignReplacement(
+      lessonId,
+      originalTeacherId,
+      selectedTeacherId
+    );
   };
 
   // Handle replacement assignment
@@ -217,10 +244,11 @@ const TeacherSchedulesManager = ({
     getLessonsForDay().forEach(({ timeSlot, lessons }) => {
       lessons.forEach((lesson: any) => {
         if (lesson.isAbsent) {
-          const bestReplacement = findBestReplacement(
+          const availableReplacements = getAvailableReplacements(
             lesson.teacher.id,
             timeSlot
           );
+          const bestReplacement = availableReplacements[0];
           if (bestReplacement) {
             assignments.push({
               lessonId: lesson.id,
@@ -357,30 +385,59 @@ const TeacherSchedulesManager = ({
       {isToday && (
         <td className="p-4">
           {item.isAbsent ? (
-            <div className="space-y-2">
+            <div className="space-y-3">
               {(() => {
-                const bestReplacement = findBestReplacement(
+                const availableReplacements = getAvailableReplacements(
                   item.teacher.id,
                   `${item.startTime.toISOString()}-${item.endTime.toISOString()}`
                 );
-                return bestReplacement ? (
-                  <div>
-                    <div className="text-xs text-gray-600 mb-1">
-                      Suggested: {bestReplacement.name}{" "}
-                      {bestReplacement.surname}
+                const bestReplacement = availableReplacements[0];
+
+                return availableReplacements.length > 0 ? (
+                  <div className="space-y-2">
+                    {/* Suggested replacement info */}
+                    <div className="text-xs text-gray-600">
+                      <span className="font-medium">Suggested:</span>{" "}
+                      {bestReplacement.name} {bestReplacement.surname}
                     </div>
+
+                    {/* Replacement selection dropdown */}
+                    <div className="space-y-1">
+                      <label className="text-xs text-gray-600 font-medium">
+                        Choose Replacement:
+                      </label>
+                      <select
+                        value={
+                          selectedReplacements[item.id] || bestReplacement.id
+                        }
+                        onChange={(e) =>
+                          handleReplacementSelection(item.id, e.target.value)
+                        }
+                        className="w-full px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-customSky"
+                      >
+                        {availableReplacements.map((teacher) => (
+                          <option key={teacher.id} value={teacher.id}>
+                            {teacher.name} {teacher.surname}
+                            {teacher.id === bestReplacement.id
+                              ? " (Suggested)"
+                              : ""}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* Assign button */}
                     <button
                       onClick={() =>
-                        handleAssignReplacement(
+                        handleAssignSelectedReplacement(
                           item.id,
-                          item.teacher.id,
-                          bestReplacement.id
+                          item.teacher.id
                         )
                       }
                       disabled={loading}
-                      className="px-3 py-1 bg-customSky text-white text-xs rounded hover:bg-customSkyLight disabled:opacity-50"
+                      className="w-full px-3 py-1 bg-customSky text-white text-xs rounded hover:bg-customSkyLight disabled:opacity-50 font-medium"
                     >
-                      Assign
+                      {loading ? "Assigning..." : "Assign Selected"}
                     </button>
                   </div>
                 ) : (

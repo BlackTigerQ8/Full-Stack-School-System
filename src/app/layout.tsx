@@ -5,6 +5,9 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import SessionProvider from "@/components/SessionProvider";
 import ToastProvider from "@/components/ToastProvider";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
+import { cookies } from "next/headers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -17,15 +20,24 @@ export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
+  params: { locale: string };
 }>) {
   const session = await getServerSession(authOptions);
 
+  // Get locale from cookie or default to Arabic
+  const cookieStore = cookies();
+  const locale = cookieStore.get("NEXT_LOCALE")?.value || "ar";
+  const messages = await getMessages();
+
   return (
-    <html lang="en">
+    <html lang={locale} dir={locale === "ar" ? "rtl" : "ltr"}>
       <body className={inter.className}>
-        <SessionProvider session={session}>
-          {children} <ToastProvider />
-        </SessionProvider>
+        <NextIntlClientProvider messages={messages}>
+          <SessionProvider session={session}>
+            {children}
+            <ToastProvider />
+          </SessionProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );

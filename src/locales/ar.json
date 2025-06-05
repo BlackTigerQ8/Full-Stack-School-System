@@ -1,0 +1,90 @@
+{
+  "navbar": {
+    "search": "بحث...",
+    "messages": "الرسائل",
+    "announcements": "الإعلانات",
+    "profile": "الملف الشخصي",
+    "language": "اللغة"
+  },
+  "menu": {
+    "sections": {
+      "menu": "القائمة",
+      "other": "أخرى"
+    },
+    "items": {
+      "home": "الرئيسية",
+      "teachers": "المدرسون",
+      "students": "الطلاب",
+      "parents": "أولياء الأمور",
+      "subjects": "المواد",
+      "classes": "الصفوف",
+      "lessons": "الدروس",
+      "schedules": "الجداول",
+      "exams": "الامتحانات",
+      "assignments": "الواجبات",
+      "results": "النتائج",
+      "attendance": "الحضور",
+      "events": "الأحداث",
+      "messages": "الرسائل",
+      "announcements": "الإعلانات",
+      "profile": "الملف الشخصي",
+      "settings": "الإعدادات",
+      "logout": "تسجيل الخروج"
+    }
+  },
+  "teachers": {
+    "title": "جميع المدرسين",
+    "headers": {
+      "info": "المعلومات",
+      "teacherId": "رقم المدرس",
+      "subjects": "المواد",
+      "classes": "الصفوف",
+      "phone": "الهاتف",
+      "address": "العنوان",
+      "actions": "الإجراءات"
+    },
+    "search": "البحث عن مدرس...",
+    "buttons": {
+      "filter": "تصفية",
+      "sort": "ترتيب",
+      "create": "إضافة مدرس جديد",
+      "view": "عرض",
+      "edit": "تعديل",
+      "delete": "حذف"
+    }
+  },
+  "common": {
+    "admin": "مدير",
+    "teacher": "مدرس",
+    "student": "طالب",
+    "parent": "ولي أمر",
+    "user": "مستخدم",
+    "arabic": "العربية",
+    "english": "English",
+    "search": "بحث...",
+    "loading": "جاري التحميل...",
+    "noData": "لا توجد بيانات",
+    "page": "صفحة",
+    "of": "من",
+    "previous": "السابق",
+    "next": "التالي",
+    "teachers": "المدرسين",
+    "students": "الطلاب",
+    "parents": "أولياء الأمور",
+    "subjects": "المواد",
+    "classes": "الصفوف",
+    "lessons": "الدروس",
+    "schedules": "الجداول",
+    "exams": "الامتحانات",
+    "assignments": "الواجبات",
+    "results": "النتائج",
+    "attendance": "الحضور",
+    "events": "الأحداث",
+    "messages": "الرسائل",
+    "announcements": "الإعلانات"
+  },
+  "dashboard": {
+    "welcome": "مرحباً",
+    "overview": "نظرة عامة"
+  }
+}

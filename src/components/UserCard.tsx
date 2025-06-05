@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { getTranslations, getLocale } from "next-intl/server";
 import Image from "next/image";
 
 const UserCard = async ({
@@ -14,6 +15,8 @@ const UserCard = async ({
   };
 
   const data = await modelMap[type].count();
+  const t = await getTranslations("common");
+  const locale = await getLocale();
 
   return (
     <div className="rounded-2xl odd:bg-customPurple even:bg-customYellow p-4 flex-1 min-w-[130px]">
@@ -24,7 +27,10 @@ const UserCard = async ({
         <Image src="/more.png" alt="" width={20} height={20} />
       </div>
       <h1 className="text-2xl font-semibold my-4">{data}</h1>
-      <h2 className="capitalize text-sm font-medium text-gray-500">{type}s</h2>
+      <h2 className="capitalize text-sm font-medium text-gray-500">
+        {t(type)}
+        {locale === "en" ? "s" : ""}
+      </h2>
     </div>
   );
 };

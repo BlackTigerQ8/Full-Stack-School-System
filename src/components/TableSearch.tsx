@@ -1,8 +1,10 @@
 "use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const TableSearch = () => {
+  const { messages } = useLanguage();
   const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -21,7 +23,7 @@ const TableSearch = () => {
       <Image src="/search.png" alt="" width={14} height={14} />
       <input
         type="text"
-        placeholder="Search..."
+        placeholder={messages?.common?.search || "Search..."}
         className="w-[200px] p-2 bg-transparent outline-none"
       />
     </form>

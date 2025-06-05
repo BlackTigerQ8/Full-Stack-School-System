@@ -1,0 +1,90 @@
+{
+  "navbar": {
+    "search": "Search...",
+    "messages": "Messages",
+    "announcements": "Announcements",
+    "profile": "Profile",
+    "language": "Language"
+  },
+  "menu": {
+    "sections": {
+      "menu": "MENU",
+      "other": "OTHER"
+    },
+    "items": {
+      "home": "Home",
+      "teachers": "Teachers",
+      "students": "Students",
+      "parents": "Parents",
+      "subjects": "Subjects",
+      "classes": "Classes",
+      "lessons": "Lessons",
+      "schedules": "Schedules",
+      "exams": "Exams",
+      "assignments": "Assignments",
+      "results": "Results",
+      "attendance": "Attendance",
+      "events": "Events",
+      "messages": "Messages",
+      "announcements": "Announcements",
+      "profile": "Profile",
+      "settings": "Settings",
+      "logout": "Logout"
+    }
+  },
+  "teachers": {
+    "title": "All Teachers",
+    "headers": {
+      "info": "Info",
+      "teacherId": "Teacher ID",
+      "subjects": "Subjects",
+      "classes": "Classes",
+      "phone": "Phone",
+      "address": "Address",
+      "actions": "Actions"
+    },
+    "search": "Search for a teacher...",
+    "buttons": {
+      "filter": "Filter",
+      "sort": "Sort",
+      "create": "Add New Teacher",
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete"
+    }
+  },
+  "common": {
+    "admin": "Admin",
+    "teacher": "Teacher",
+    "student": "Student",
+    "parent": "Parent",
+    "user": "User",
+    "arabic": "العربية",
+    "english": "English",
+    "search": "Search...",
+    "loading": "Loading...",
+    "noData": "No data available",
+    "page": "Page",
+    "of": "of",
+    "previous": "Previous",
+    "next": "Next",
+    "teachers": "Teachers",
+    "students": "Students",
+    "parents": "Parents",
+    "subjects": "Subjects",
+    "classes": "Classes",
+    "lessons": "Lessons",
+    "schedules": "Schedules",
+    "exams": "Exams",
+    "assignments": "Assignments",
+    "results": "Results",
+    "attendance": "Attendance",
+    "events": "Events",
+    "messages": "Messages",
+    "announcements": "Announcements"
+  },
+  "dashboard": {
+    "welcome": "Welcome",
+    "overview": "Overview"
+  }
+}

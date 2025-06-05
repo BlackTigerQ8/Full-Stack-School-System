@@ -2,6 +2,8 @@ import Image from "next/image";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
+import LanguageToggle from "./LanguageToggle";
+import { useTranslations } from "next-intl";
 
 const getUserProfileImage = async (
   userId: string,
@@ -64,6 +66,9 @@ const Navbar = async () => {
       </div>
       {/* ICONS AND USER */}
       <div className="flex items-center gap-6 justify-end w-full">
+        {/* Language Toggle */}
+        <LanguageToggle />
+
         <div className="bg-white rounded-full w-7 h-7 flex items-center justify-center cursor-pointer">
           <Image src="/message.png" alt="" width={20} height={20} />
         </div>
