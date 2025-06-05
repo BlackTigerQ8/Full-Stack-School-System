@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.1",
-    "@prisma/client": "^6.8.2",
+    "@prisma/client": "^6.9.0",
     "@types/sharp": "^0.31.1",
     "bcryptjs": "^3.0.2",
     "jsonwebtoken": "^9.0.2",
@@ -18,7 +18,7 @@
     "next": "^14.2.25",
     "next-auth": "^4.24.11",
     "next-cloudinary": "^6.16.0",
-    "prisma": "^6.8.2",
+    "prisma": "^6.9.0",
     "react": "^18",
     "react-big-calendar": "^1.18.0",
     "react-calendar": "^5.1.0",

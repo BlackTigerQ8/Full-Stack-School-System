@@ -9,6 +9,7 @@ import LogoutModal from "./LogoutModal";
 const Menu = () => {
   const { data: session } = useSession();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+  const [tooltip, setTooltip] = useState({ show: false, text: "", x: 0, y: 0 });
   const role = session?.user?.role;
 
   const handleLogoutClick = () => {
@@ -17,6 +18,20 @@ const Menu = () => {
 
   const closeLogoutModal = () => {
     setShowLogoutModal(false);
+  };
+
+  const showTooltip = (e: React.MouseEvent, text: string) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    setTooltip({
+      show: true,
+      text,
+      x: rect.right + 10,
+      y: rect.top + rect.height / 2,
+    });
+  };
+
+  const hideTooltip = () => {
+    setTooltip({ show: false, text: "", x: 0, y: 0 });
   };
 
   const menuItems = [
@@ -64,6 +79,12 @@ const Menu = () => {
           label: "Lessons",
           href: "/list/lessons",
           visible: ["admin", "teacher"],
+        },
+        {
+          icon: "/calendar.png",
+          label: "Schedules",
+          href: "/list/schedules",
+          visible: ["admin"],
         },
         {
           icon: "/exam.png",
@@ -150,6 +171,8 @@ const Menu = () => {
                     <button
                       key={item.label}
                       onClick={handleLogoutClick}
+                      onMouseEnter={(e) => showTooltip(e, item.label)}
+                      onMouseLeave={hideTooltip}
                       className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-customSkyLight w-full text-left"
                     >
                       <Image src={item.icon} alt="" width={20} height={20} />
@@ -163,6 +186,8 @@ const Menu = () => {
                   <Link
                     href={item.href}
                     key={item.label}
+                    onMouseEnter={(e) => showTooltip(e, item.label)}
+                    onMouseLeave={hideTooltip}
                     className="flex items-center justify-center lg:justify-start gap-4 text-gray-500 py-2 md:px-2 rounded-md hover:bg-customSkyLight"
                   >
                     <Image src={item.icon} alt="" width={20} height={20} />
@@ -173,6 +198,20 @@ const Menu = () => {
             })}
           </div>
         ))}
+
+        {/* Tooltip */}
+        {tooltip.show && (
+          <div
+            className="fixed z-50 bg-gray-800 text-white text-xs px-2 py-1 rounded shadow-lg pointer-events-none lg:hidden"
+            style={{
+              left: `${tooltip.x}px`,
+              top: `${tooltip.y - 0}px`,
+              transform: "translateY(-50%)",
+            }}
+          >
+            {tooltip.text}
+          </div>
+        )}
       </div>
 
       {/* Logout Confirmation Modal */}

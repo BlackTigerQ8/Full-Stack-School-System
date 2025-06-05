@@ -2,92 +2,98 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-
-export async function GET() {
-  try {
-    const lessons = await prisma.lesson.findMany({
-      include: {
-        subject: true,
-        class: true,
-        teacher: {
-          select: {
-            name: true,
-            surname: true,
-          },
-        },
-      },
-    });
-
-    // Transform lessons to calendar event format
-    const calendarEvents = lessons.map((lesson) => ({
-      id: lesson.id,
-      title: `${lesson.subject.name} - ${lesson.class.name}`,
-      start: lesson.startTime,
-      end: lesson.endTime,
-      allDay: false,
-      resource: {
-        lessonId: lesson.id,
-        subjectId: lesson.subjectId,
-        classId: lesson.classId,
-        teacherId: lesson.teacherId,
-        teacher: `${lesson.teacher.name} ${lesson.teacher.surname}`,
-      },
-    }));
-
-    return NextResponse.json(calendarEvents);
-  } catch (error) {
-    console.error("Error fetching lessons:", error);
-    return NextResponse.json(
-      { error: "Failed to fetch lessons" },
-      { status: 500 }
-    );
-  }
-}
+import { revalidatePath } from "next/cache";
 
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
-    if (!session || session.user.role !== "admin") {
+    if (!session?.user || session.user.role !== "teacher") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const body = await request.json();
-    const { name, startTime, endTime, subjectId, classId, teacherId, day } =
-      body;
+    const { attendance } = await request.json();
 
-    const lesson = await prisma.lesson.create({
-      data: {
-        name,
-        startTime: new Date(startTime),
-        endTime: new Date(endTime),
-        subjectId: parseInt(subjectId),
-        classId: parseInt(classId),
-        teacherId,
-        day,
+    if (!Array.isArray(attendance) || attendance.length === 0) {
+      return NextResponse.json(
+        { error: "Invalid attendance data" },
+        { status: 400 }
+      );
+    }
+
+    // Get the teacher's lesson for this class
+    const lesson = await prisma.lesson.findFirst({
+      where: {
+        classId: attendance[0].classId,
+        teacherId: session.user.id,
       },
-      include: {
-        subject: true,
-        class: true,
-        teacher: {
-          select: {
-            name: true,
-            surname: true,
-          },
+    });
+
+    if (!lesson) {
+      return NextResponse.json(
+        { error: "You don't teach this class" },
+        { status: 403 }
+      );
+    }
+
+    // Check if attendance already exists for this date/lesson/students
+    const existingAttendance = await prisma.attendance.findMany({
+      where: {
+        date: {
+          gte: new Date(attendance[0].date),
+          lt: new Date(
+            new Date(attendance[0].date).getTime() + 24 * 60 * 60 * 1000
+          ),
+        },
+        lessonId: lesson.id,
+        studentId: {
+          in: attendance.map((a: any) => a.studentId),
         },
       },
     });
 
-    return NextResponse.json({
-      id: lesson.id,
-      title: `${lesson.subject.name} - ${lesson.class.name}`,
-      start: lesson.startTime,
-      end: lesson.endTime,
-      allDay: false,
-    });
+    if (existingAttendance.length > 0) {
+      // Update existing records
+      await Promise.all(
+        attendance.map(async (record: any) => {
+          const existing = existingAttendance.find(
+            (ea) => ea.studentId === record.studentId
+          );
+
+          if (existing) {
+            return prisma.attendance.update({
+              where: { id: existing.id },
+              data: { present: record.present },
+            });
+          } else {
+            return prisma.attendance.create({
+              data: {
+                date: new Date(record.date),
+                present: record.present,
+                studentId: record.studentId,
+                lessonId: lesson.id,
+              },
+            });
+          }
+        })
+      );
+    } else {
+      // Create new records
+      await prisma.attendance.createMany({
+        data: attendance.map((record: any) => ({
+          date: new Date(record.date),
+          present: record.present,
+          studentId: record.studentId,
+          lessonId: lesson.id,
+        })),
+      });
+    }
+
+    revalidatePath("/list/attendance");
+    return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Error creating lesson:", error);
+    console.error("Error saving student attendance:", error);
     return NextResponse.json(
-      { error: "Failed to create lesson" },
+      { error: "Failed to save attendance" },
       { status: 500 }
     );
   }

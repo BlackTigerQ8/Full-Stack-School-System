@@ -65,7 +65,9 @@ const renderRow = (item: TeacherList, role: string | undefined) => (
         className="md:hidden xl:block w-10 h-10 rounded-full object-cover"
       />
       <div className="flex flex-col">
-        <h3 className="font-semibold">{item.name}</h3>
+        <h3 className="font-semibold">
+          {item.name} {item.surname}
+        </h3>
         <p className="text-xs text-gray-500">{item?.email}</p>
       </div>
     </td>
@@ -125,10 +127,37 @@ const TeacherListPage = async ({
             break;
           }
           case "search": {
-            query.name = {
-              contains: value,
-              mode: "insensitive",
-            };
+            query.OR = [
+              {
+                name: {
+                  contains: value,
+                  mode: "insensitive",
+                },
+              },
+              {
+                surname: {
+                  contains: value,
+                  mode: "insensitive",
+                },
+              },
+              // Search for full name (name + surname)
+              {
+                AND: [
+                  {
+                    name: {
+                      contains: value.split(" ")[0] || "",
+                      mode: "insensitive",
+                    },
+                  },
+                  {
+                    surname: {
+                      contains: value.split(" ")[1] || value.split(" ")[0],
+                      mode: "insensitive",
+                    },
+                  },
+                ],
+              },
+            ];
             break;
           }
           default:

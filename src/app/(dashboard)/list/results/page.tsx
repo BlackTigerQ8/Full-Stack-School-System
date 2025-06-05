@@ -64,14 +64,14 @@ const renderRow = (item: ResultList, role: string | undefined) => (
     key={item?.id}
     className="border-b border-gray-200 even:bg-slate-50 text-sm hover:bg-customPurpleLight"
   >
-    <td className="flex items-center gap-4 p-4">{item?.title}</td>
+    <td className="flex items-center gap-4 p-4">{item?.title || "N/A"}</td>
     <td>{item?.studentName + " " + item?.studentSurname}</td>
-    <td className="hidden md:table-cell">{item?.score}</td>
+    <td className="hidden md:table-cell">{item?.score || "N/A"}</td>
     <td className="hidden md:table-cell">
       {" "}
       {item?.teacherName + " " + item?.teacherSurname}
     </td>
-    <td className="hidden md:table-cell">{item?.className}</td>
+    <td className="hidden md:table-cell">{item?.className || "N/A"}</td>
     <td className="hidden md:table-cell">
       {" "}
       {new Intl.DateTimeFormat("en-GB", {
@@ -185,25 +185,34 @@ const ResultListPage = async ({
     }),
   ]);
 
-  const data = dataRes.map((item) => {
-    const assessment = item.exam || item.assignment;
+  const data = dataRes
+    .map((item) => {
+      const assessment = item.exam || item.assignment;
 
-    if (!assessment) return null;
+      if (
+        !assessment ||
+        !assessment.lesson ||
+        !assessment.lesson.teacher ||
+        !item.student
+      ) {
+        return null;
+      }
 
-    const isExam = "startTime" in assessment;
+      const isExam = "startTime" in assessment;
 
-    return {
-      id: item.id,
-      title: assessment.title,
-      studentName: item.student.name,
-      studentSurname: item.student.surname,
-      teacherName: assessment.lesson.teacher.name,
-      teacherSurname: assessment.lesson.teacher.surname,
-      score: item.score,
-      className: assessment.lesson.class.name,
-      startTime: isExam ? assessment.startTime : assessment.startDate,
-    };
-  });
+      return {
+        id: item.id,
+        title: assessment.title,
+        studentName: item.student.name,
+        studentSurname: item.student.surname,
+        teacherName: assessment.lesson.teacher.name,
+        teacherSurname: assessment.lesson.teacher.surname,
+        score: item.score,
+        className: assessment.lesson.class.name,
+        startTime: isExam ? assessment.startTime : assessment.startDate,
+      };
+    })
+    .filter(Boolean) as ResultList[];
 
   return (
     <div className="bg-white p-4 rounded-md flex-1 m-4 mt-0">

@@ -54,23 +54,26 @@ model Student {
 }
 
 model Teacher {
-  id        String    @id
-  username  String    @unique
-  name      String
-  surname   String
-  civilId   String    @unique
-  email     String?   @unique
-  phone     String?   @unique
-  address   String
-  img       String?
-  bloodType String
-  sex       UserSex
-  createdAt DateTime  @default(now())
-  subjects  Subject[]
-  lessons   Lesson[]
-  classes   Class[]
-  birthday  DateTime
-  user      User?     @relation("UserTeacher", fields: [id], references: [id], onDelete: Cascade)
+  id                   String               @id
+  username             String               @unique
+  name                 String
+  surname              String
+  civilId              String               @unique
+  email                String?              @unique
+  phone                String?              @unique
+  address              String
+  img                  String?
+  bloodType            String
+  sex                  UserSex
+  createdAt            DateTime             @default(now())
+  subjects             Subject[]
+  lessons              Lesson[]
+  classes              Class[]
+  birthday             DateTime
+  user                 User?                @relation("UserTeacher", fields: [id], references: [id], onDelete: Cascade)
+  attendances          TeacherAttendance[]
+  originalReplacements TeacherReplacement[] @relation("OriginalTeacher")
+  replacementsDone     TeacherReplacement[] @relation("ReplacementTeacher")
 }
 
 model Parent {
@@ -124,15 +127,16 @@ model Lesson {
   startTime DateTime
   endTime   DateTime
 
-  subjectId   Int
-  subject     Subject      @relation(fields: [subjectId], references: [id])
-  classId     Int
-  class       Class        @relation(fields: [classId], references: [id])
-  teacherId   String
-  teacher     Teacher      @relation(fields: [teacherId], references: [id])
-  exams       Exam[]
-  assignments Assignment[]
-  attendances Attendance[]
+  subjectId    Int
+  subject      Subject              @relation(fields: [subjectId], references: [id])
+  classId      Int
+  class        Class                @relation(fields: [classId], references: [id])
+  teacherId    String
+  teacher      Teacher              @relation(fields: [teacherId], references: [id])
+  exams        Exam[]
+  assignments  Assignment[]
+  attendances  Attendance[]
+  replacements TeacherReplacement[]
 }
 
 model Exam {
@@ -178,6 +182,30 @@ model Attendance {
   student   Student @relation(fields: [studentId], references: [id])
   lessonId  Int
   lesson    Lesson  @relation(fields: [lessonId], references: [id])
+}
+
+model TeacherAttendance {
+  id        Int      @id @default(autoincrement())
+  date      DateTime
+  present   Boolean
+  teacherId String
+  teacher   Teacher  @relation(fields: [teacherId], references: [id])
+
+  @@unique([date, teacherId])
+}
+
+model TeacherReplacement {
+  id                   Int      @id @default(autoincrement())
+  date                 DateTime
+  originalTeacherId    String
+  originalTeacher      Teacher  @relation("OriginalTeacher", fields: [originalTeacherId], references: [id])
+  replacementTeacherId String
+  replacementTeacher   Teacher  @relation("ReplacementTeacher", fields: [replacementTeacherId], references: [id])
+  lessonId             Int
+  lesson               Lesson   @relation(fields: [lessonId], references: [id])
+  createdAt            DateTime @default(now())
+
+  @@unique([date, lessonId])
 }
 
 model Event {

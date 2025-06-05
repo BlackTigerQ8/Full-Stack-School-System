@@ -62,19 +62,23 @@ const AttendanceForm = ({
     <form className="flex flex-col gap-8" onSubmit={onSubmit}>
       <h1 className="text-xl font-semibold">
         {type === "create"
-          ? "Create a new attendance"
-          : "Update the attendance"}
+          ? "Create a new attendance record"
+          : "Update the attendance record"}
       </h1>
 
       <div className="flex justify-between flex-wrap gap-4">
         <InputField
           label="Date"
           name="date"
-          defaultValue={data?.date}
+          defaultValue={
+            data?.date?.toISOString().split("T")[0] ||
+            new Date().toISOString().split("T")[0]
+          }
           register={register}
           error={errors?.date}
           type="date"
         />
+
         <div className="flex flex-col gap-2 w-full md:w-1/4">
           <label className="text-xs text-gray-500">Student</label>
           <select
@@ -97,6 +101,7 @@ const AttendanceForm = ({
             </p>
           )}
         </div>
+
         <div className="flex flex-col gap-2 w-full md:w-1/4">
           <label className="text-xs text-gray-500">Lesson</label>
           <select
@@ -105,11 +110,18 @@ const AttendanceForm = ({
             defaultValue={data?.lessonId}
           >
             <option value="">Select a lesson</option>
-            {lessons?.map((lesson: { id: number; name: string }) => (
-              <option value={lesson.id} key={lesson.id}>
-                {lesson.name}
-              </option>
-            ))}
+            {lessons?.map(
+              (lesson: {
+                id: number;
+                name: string;
+                subject: { name: string };
+                class: { name: string };
+              }) => (
+                <option value={lesson.id} key={lesson.id}>
+                  {lesson.subject.name} - {lesson.class.name}
+                </option>
+              )
+            )}
           </select>
           {errors.lessonId?.message && (
             <p className="text-xs text-red-400">
@@ -117,14 +129,15 @@ const AttendanceForm = ({
             </p>
           )}
         </div>
+
         <div className="flex flex-col gap-2 w-full md:w-1/4">
-          <label className="text-xs text-gray-500">Present</label>
+          <label className="text-xs text-gray-500">Attendance Status</label>
           <select
             className="ring-[1.5px] ring-gray-300 p-2 rounded-md text-sm w-full"
             {...register("present")}
             defaultValue={data?.present?.toString()}
           >
-            <option value="">Select attendance</option>
+            <option value="">Select status</option>
             <option value="true">Present</option>
             <option value="false">Absent</option>
           </select>
@@ -134,6 +147,7 @@ const AttendanceForm = ({
             </p>
           )}
         </div>
+
         {data && (
           <InputField
             label="Id"
@@ -145,9 +159,11 @@ const AttendanceForm = ({
           />
         )}
       </div>
+
       {state.error && (
         <span className="text-red-500">Something went wrong!</span>
       )}
+
       <button className="bg-blue-400 text-white p-2 rounded-md">
         {type === "create" ? "Create" : "Update"}
       </button>
