@@ -1,23 +1,25 @@
-version: "3.8"
-
 services:
   postgres:
     image: postgres:15
     container_name: postgres_db
     ports:
-      - 5432:5432
+      - "5432:5432"
     environment:
-      POSTGRES_USER: blacktiger
+      POSTGRES_USER: blacktigerq8
       POSTGRES_PASSWORD: Aa66850080!
       POSTGRES_DB: school
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
   app:
+    build: .
     container_name: school_app
     ports:
       - "3000:3000"
     depends_on:
       - postgres
     environment:
-      - DATABASE_URL=postgresql://blacktigerq8:Aa66850080!@localhost:5432/school
+      - DATABASE_URL=postgresql://blacktigerq8:Aa66850080!@postgres:5432/school
+
+volumes:
+  postgres_data:
