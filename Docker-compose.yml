@@ -20,6 +20,9 @@ services:
       - postgres
     environment:
       - DATABASE_URL=postgresql://blacktigerq8:Aa66850080!@postgres:5432/school
+      - NEXTAUTH_SECRET=x/HLUkgbdC+r4p9mR6ycSs3OcSOOXE081Jg3+y24PCQ=
+      - NEXTAUTH_URL=http://5.182.18.226:3000
+      - NODE_ENV=production
 
 volumes:
   postgres_data:

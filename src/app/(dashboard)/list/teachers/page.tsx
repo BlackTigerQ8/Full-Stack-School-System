@@ -8,17 +8,14 @@ import Image from "next/image";
 import Link from "next/link";
 import { getRole } from "@/lib/utils";
 import FormContainer from "@/components/FormContainer";
-import { useTranslations } from "next-intl";
 import { getTranslations } from "next-intl/server";
 
 type TeacherList = Teacher & { subjects: Subject[] } & { classes: Class[] };
 
 const TeacherListPage = async ({
   searchParams,
-  params: { locale },
 }: {
   searchParams: { [key: string]: string | undefined };
-  params: { locale: string };
 }) => {
   const { page, ...queryParams } = searchParams;
   const p = page ? Number(page) : 1;
@@ -98,7 +95,7 @@ const TeacherListPage = async ({
       <td className="hidden md:table-cell">{item.address}</td>
       <td>
         <div className="flex items-center gap-2">
-          <Link href={`/${locale}/list/teachers/${item.id}`}>
+          <Link href={`/list/teachers/${item.id}`}>
             <button className="w-7 h-7 flex items-center justify-center rounded-full bg-customSky">
               <Image src="/view.png" alt="" width={16} height={16} />
             </button>
