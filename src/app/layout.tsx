@@ -8,6 +8,7 @@ import ToastProvider from "@/components/ToastProvider";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import { cookies } from "next/headers";
+import { LanguageProvider } from "@/contexts/LanguageContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,9 +25,9 @@ export default async function RootLayout({
 }>) {
   const session = await getServerSession(authOptions);
 
-  // Get locale from cookie or default to Arabic
+  // Get locale from cookie or default to English
   const cookieStore = cookies();
-  const locale = cookieStore.get("NEXT_LOCALE")?.value || "ar";
+  const locale = cookieStore.get("NEXT_LOCALE")?.value || "en";
   const messages = await getMessages();
 
   return (
@@ -34,8 +35,10 @@ export default async function RootLayout({
       <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
           <SessionProvider session={session}>
-            {children}
-            <ToastProvider />
+            <LanguageProvider initialLanguage={locale as "ar" | "en"}>
+              {children}
+              <ToastProvider />
+            </LanguageProvider>
           </SessionProvider>
         </NextIntlClientProvider>
       </body>

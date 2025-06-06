@@ -1,21 +1,25 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const LanguageToggle = () => {
   const router = useRouter();
-  const [currentLocale, setCurrentLocale] = useState(() => {
-    // Get current locale from cookie or default to 'ar'
-    if (typeof window !== "undefined") {
-      const cookies = document.cookie.split(";");
-      const localeCookie = cookies.find((cookie) =>
-        cookie.trim().startsWith("NEXT_LOCALE=")
-      );
-      return localeCookie?.split("=")[1] || "ar";
-    }
-    return "ar";
-  });
+  const [currentLocale, setCurrentLocale] = useState("ar"); // Always start with default
+  const [isClient, setIsClient] = useState(false);
+
+  // Only run on client side after hydration
+  useEffect(() => {
+    setIsClient(true);
+
+    // Get current locale from cookie
+    const cookies = document.cookie.split(";");
+    const localeCookie = cookies.find((cookie) =>
+      cookie.trim().startsWith("NEXT_LOCALE=")
+    );
+    const locale = localeCookie?.split("=")[1] || "ar";
+    setCurrentLocale(locale);
+  }, []);
 
   const toggleLanguage = () => {
     const newLocale = currentLocale === "ar" ? "en" : "ar";
@@ -33,6 +37,19 @@ const LanguageToggle = () => {
     // Refresh the page to apply new locale
     router.refresh();
   };
+
+  // Show a loading state or default content until client-side hydration is complete
+  if (!isClient) {
+    return (
+      <button
+        className="bg-white rounded-full px-3 py-1 flex items-center justify-center cursor-pointer border border-gray-200 hover:bg-gray-50 transition-colors"
+        title="Toggle Language"
+        disabled
+      >
+        <span className="text-xs font-medium">EN</span>
+      </button>
+    );
+  }
 
   return (
     <button
