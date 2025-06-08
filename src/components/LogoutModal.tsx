@@ -13,7 +13,7 @@ export default function LogoutModal({ isOpen, onClose }: LogoutModalProps) {
 
   const handleLogout = () => {
     signOut({
-      callbackUrl: "/auth/signin",
+      callbackUrl: "/api/auth/signin",
       redirect: true,
     });
   };

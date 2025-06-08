@@ -47,19 +47,19 @@ const Menu = () => {
           visible: ["admin", "teacher", "student", "parent"],
         },
         {
-          icon: "/teacher.png",
+          icon: "/iconTeacher.png",
           label: t("menu.items.teachers"),
           href: "/list/teachers",
           visible: ["admin", "teacher"],
         },
         {
-          icon: "/student.png",
+          icon: "/iconStudent.png",
           label: t("menu.items.students"),
           href: "/list/students",
           visible: ["admin", "teacher"],
         },
         {
-          icon: "/parent.png",
+          icon: "/iconParent.png",
           label: t("menu.items.parents"),
           href: "/list/parents",
           visible: ["admin", "teacher"],
