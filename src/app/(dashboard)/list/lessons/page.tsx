@@ -7,6 +7,7 @@ import { Class, Lesson, Prisma, Subject, Teacher } from "@prisma/client";
 import Image from "next/image";
 import { getRole } from "@/lib/utils";
 import FormContainer from "@/components/FormContainer";
+import ArchiveScheduleButton from "@/components/ArchiveScheduleButton";
 
 type LessonList = Lesson & {
   teacher: Teacher;
@@ -73,6 +74,7 @@ const LessonListPage = async ({
 
   // URL PARAMS CONDITION
   const query: Prisma.LessonWhereInput = {};
+  query.archived = false;
 
   // This part is to restrict the query to only the teachers that teach the class
   if (queryParams) {
@@ -124,6 +126,7 @@ const LessonListPage = async ({
       <div className="flex items-center justify-between">
         <h1 className="hidden md:block text-lg font-semibold">All Lessons</h1>
         <div className="flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
+          {role === "admin" && <ArchiveScheduleButton />}
           <TableSearch />
           <div className="flex items-center gap-4 self-end">
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-customYellow">
@@ -132,9 +135,7 @@ const LessonListPage = async ({
             <button className="w-8 h-8 flex items-center justify-center rounded-full bg-customYellow">
               <Image src="/sort.png" alt="" width={14} height={14} />
             </button>
-            {(role === "admin" || role === "teacher") && (
-              <FormContainer table="lesson" type="create" />
-            )}
+            {role === "admin" && <FormContainer table="lesson" type="create" />}
           </div>
         </div>
       </div>

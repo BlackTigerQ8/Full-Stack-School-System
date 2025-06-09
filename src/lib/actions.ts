@@ -575,6 +575,41 @@ export const deleteParent = async (
   }
 };
 
+export const archiveCurrentSchedule = async (archiveName: string) => {
+  try {
+    // 1. Get all current (non-archived) lessons with their relationships
+    const currentLessons = await prisma.lesson.findMany({
+      where: { archived: false },
+      include: {
+        subject: true,
+        class: true,
+        teacher: true,
+      },
+    });
+
+    // 2. Create archive record
+    await prisma.archivedSchedule.create({
+      data: {
+        name: archiveName,
+        lessons: JSON.stringify(currentLessons),
+      },
+    });
+
+    // 3. Mark all current lessons as archived
+    await prisma.lesson.updateMany({
+      where: { archived: false },
+      data: { archived: true },
+    });
+
+    revalidatePath("/list/lessons");
+    revalidatePath("/list/schedules");
+    return { success: true, error: false };
+  } catch (err) {
+    console.error(err);
+    return { success: false, error: true };
+  }
+};
+
 // LESSON ACTIONS
 export const createLesson = async (
   currentState: CurrentState,
@@ -590,6 +625,7 @@ export const createLesson = async (
         subjectId: data.subjectId,
         classId: data.classId,
         teacherId: data.teacherId,
+        archived: false,
       },
     });
 
@@ -616,6 +652,7 @@ export const updateLesson = async (
         subjectId: data.subjectId,
         classId: data.classId,
         teacherId: data.teacherId,
+        archived: false,
       },
     });
 

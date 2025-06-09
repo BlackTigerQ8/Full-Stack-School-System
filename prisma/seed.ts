@@ -445,6 +445,7 @@ async function main() {
   const daysUntilMonday = (1 - today.getDay() + 7) % 7;
   nextMonday.setDate(today.getDate() + daysUntilMonday);
 
+  // Create regular lessons
   for (const lesson of lessonSchedule) {
     // Calculate the actual date based on the day
     const lessonDate = new Date(nextMonday);
@@ -473,9 +474,67 @@ async function main() {
         subjectId: lesson.subjectId,
         classId: lesson.classId,
         teacherId: lesson.teacherId,
+        archived: false,
       },
     });
   }
+
+  // Create some archived lessons (from previous semester)
+  console.log("📅 Creating archived lessons...");
+  const previousSemesterDate = new Date(today);
+  previousSemesterDate.setMonth(previousSemesterDate.getMonth() - 6); // 6 months ago
+
+  for (const lesson of lessonSchedule.slice(0, 30)) {
+    // Take first 30 lessons for archive
+    const lessonDate = new Date(previousSemesterDate);
+    const dayOffset =
+      lesson.day === Day.SUNDAY
+        ? 6
+        : lesson.day === Day.MONDAY
+        ? 0
+        : lesson.day === Day.TUESDAY
+        ? 1
+        : lesson.day === Day.WEDNESDAY
+        ? 2
+        : 3;
+    lessonDate.setDate(previousSemesterDate.getDate() + dayOffset);
+    lessonDate.setHours(lesson.startHour, 0, 0, 0);
+
+    const endTime = new Date(lessonDate);
+    endTime.setHours(lesson.endHour, 0, 0, 0);
+
+    await prisma.lesson.create({
+      data: {
+        name: lesson.name,
+        day: lesson.day,
+        startTime: lessonDate,
+        endTime: endTime,
+        subjectId: lesson.subjectId,
+        classId: lesson.classId,
+        teacherId: lesson.teacherId,
+        archived: true,
+      },
+    });
+  }
+
+  // Create archived schedule records
+  console.log("📅 Creating archived schedule records...");
+  const archivedLessons = await prisma.lesson.findMany({
+    where: { archived: true },
+    include: {
+      teacher: true,
+      subject: true,
+      class: true,
+    },
+  });
+
+  await prisma.archivedSchedule.create({
+    data: {
+      name: "Spring Semester 2023",
+      lessons: archivedLessons,
+      archiveDate: previousSemesterDate,
+    },
+  });
 
   console.log("👨‍👩‍👧‍👦 Creating parents...");
 

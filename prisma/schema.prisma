@@ -126,6 +126,9 @@ model Lesson {
   day       Day
   startTime DateTime
   endTime   DateTime
+  archived  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   subjectId    Int
   subject      Subject              @relation(fields: [subjectId], references: [id])
@@ -137,6 +140,13 @@ model Lesson {
   assignments  Assignment[]
   attendances  Attendance[]
   replacements TeacherReplacement[]
+}
+
+model ArchivedSchedule {
+  id          Int      @id @default(autoincrement())
+  archiveDate DateTime @default(now())
+  name        String
+  lessons     Json
 }
 
 model Exam {

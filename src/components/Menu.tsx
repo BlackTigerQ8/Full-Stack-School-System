@@ -130,6 +130,12 @@ const Menu = () => {
           href: "/list/announcements",
           visible: ["admin", "teacher", "student", "parent"],
         },
+        {
+          icon: "/lesson.png",
+          label: t("menu.items.archivedLessons"),
+          href: "/list/archived-lessons",
+          visible: ["admin"],
+        },
       ],
     },
     {

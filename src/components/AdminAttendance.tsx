@@ -337,8 +337,8 @@ const AdminAttendance = ({
   return (
     <div className="space-y-6">
       {/* Date Selection */}
-      <div className="flex items-center gap-4">
-        <div>
+      <div className="flex items-center gap-4 md:flex-row flex-col justify-between">
+        <div className="flex-1 md:w-1/2 w-full">
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Date
           </label>
@@ -351,16 +351,16 @@ const AdminAttendance = ({
         </div>
 
         {/* Bulk Actions */}
-        <div className="flex gap-2 mt-6">
+        <div className="flex flex-wrap gap-2 mt-6 md:w-1/2 w-full">
           <button
             onClick={() => markAllAs("present")}
-            className="px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors"
+            className="flex-1 min-w-[100px] px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 transition-colors text-sm sm:text-base"
           >
             Mark All Present
           </button>
           <button
             onClick={() => markAllAs("absent")}
-            className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors"
+            className="flex-1 min-w-[100px] px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors text-sm sm:text-base"
           >
             Mark All Absent
           </button>
@@ -368,7 +368,7 @@ const AdminAttendance = ({
             <button
               onClick={handleSaveAll}
               disabled={savingAll}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400 transition-colors"
+              className="flex-1 min-w-[140px] px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 disabled:bg-gray-400 transition-colors text-sm sm:text-base"
             >
               {savingAll ? "Saving..." : `Save All (${unsavedCount})`}
             </button>

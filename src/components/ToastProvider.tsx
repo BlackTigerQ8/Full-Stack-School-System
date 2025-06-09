@@ -7,7 +7,7 @@ export default function ToastProvider() {
   return (
     <ToastContainer
       position="bottom-right"
-      theme="dark"
+      theme="light"
       autoClose={3000}
       hideProgressBar={false}
       newestOnTop={false}
